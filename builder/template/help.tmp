@@ -1,0 +1,35 @@
+Tasks:
+    html            Alias for release:html
+
+    release         Alias for release:html
+
+    clean           Perform clean:app, clean:assets, clean:cache and clean:build tasks
+
+    build:html      Create HTML build of an app. Concatenate all files specified in the
+                    `package.json`, copy all assets and generate `index.html` file
+
+    release:html    Create HTML build of an app. Concatenate and uglify all files
+                    specified in the `package.json`, copy all assets and generate
+                    `index.html` file
+
+    clean:app       Remove app file from build destination
+
+    clean:assets    Remove all assets from build destination
+
+    clean:cache     Clean engine cache from all engine versions previously saved
+
+    clean:build     Remove build folder
+
+Options:
+    --engine        Specify engine version that comes from Solpeo CDN or custom local / URL
+                    path to the engine file
+
+                    Default: <%=DEFAULT_ENGINE%>
+
+    --no-cache      Don\t cache engine file specified by the --engine flag
+
+                    Default: <%=DEFAULT_NO_CACHE%>
+
+    --dest          Specify destination folder for a build
+
+                    Default: <%=dest%>
