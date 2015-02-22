@@ -28,19 +28,12 @@ Engine.Asset.Manager.register({
   'boom' : Engine.Sound('static/snd/cat_die.mp3'),
   'die' : Engine.Sound('static/snd/die.wav'),
   'fire' : Engine.Sound('static/snd/fire.wav'),
-  'getStar' : Engine.Sound('static/boom.mp3'),
-  'sndStartPressed' : Engine.Sound('static/snd/sndstart.wav'),
-  'introsnd' : Engine.Sound('static/snd/intro.wav')
+  'getstar' : Engine.Sound('static/boom.wav'),
+  'sndstart' : Engine.Sound('static/snd/sndstart.wav'),
+  'introsnd' : Engine.Sound('static/snd/intro.wav'),
+  'lionsnd' : Engine.Sound('static/snd/lion.mp3'),
+  'teslasnd' : Engine.Sound('static/snd/tesla_snd.mp3'),
   
-  /*'astar1' : Engine.Sound('static/snd/s1.mp3'),
-  'astar2' : Engine.Sound('static/snd/s1.mp3'),
-  'astar3' : Engine.Sound('static/snd/s1.mp3'),
-  'astar4' : Engine.Sound('static/snd/s1.mp3'),
-  'astar5' : Engine.Sound('static/snd/s1.mp3'),
-  'astar6' : Engine.Sound('static/snd/s1.mp3'),
-  'astar7' : Engine.Sound('static/snd/s1.mp3'),
-  'astar8' : Engine.Sound('static/snd/s1.mp3'),
-  'astar9' : Engine.Sound('static/snd/s1.mp3'),*/
 });
 
 Engine.Asset.Manager.load('assets');

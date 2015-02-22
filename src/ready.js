@@ -36,10 +36,30 @@ Engine.ready(function(){
       autoplay: false
   });
   
+  var snd_start = new Engine.AmbientSound( {
+    sound: 'sndstart',
+    autoplay: false
+  });
+  
   var snd_intro = new Engine.AmbientSound( {
     sound: 'introsnd',
     autoplay: false,
     loop: true
+  });
+  
+  var snd_lion = new Engine.AmbientSound( {
+    sound: 'lionsnd',
+    autoplay: false
+  });
+  
+  var snd_tesla = new Engine.AmbientSound( {
+    sound: 'teslasnd',
+    autoplay: false
+  });
+  
+  var snd_star = new Engine.AmbientSound( {
+    sound: 'getstar',
+    autoplay: false
   });
   
   var viewport = new Engine.Viewport('engine', 800, 600);
@@ -105,7 +125,8 @@ Engine.ready(function(){
           for(var i = 0; i < Math.min(this.count-1, 8); i++) {
             SpawnMegaEnemy(Math.random() * 520 - 210, layout, Enemies); 
           }
-          if(Math.random() > .2) {
+          snd_lion.play();
+          if(Math.random() > .05) {
              SpawnTesla(Math.random() * 520 - 210, layout, stars)
           }
         }
@@ -124,6 +145,7 @@ Engine.ready(function(){
       },
       play: function () {
         this.delay = 1250;
+        this.count = 0;
       }
     }
   });
@@ -203,7 +225,7 @@ Engine.ready(function(){
   
   var GameTimer = new Engine.Timer( {
     delay: 10,
-    duration: 500,
+    duration: 200,
 	type: Engine.Timer.VSYNC,
 	autoplay: false,
 	loop: true,
@@ -263,7 +285,7 @@ Engine.ready(function(){
           AccelY = Math.min(Math.max(-10, AccelY), 10);
           paddle.rotation = (-AccelY / 90) * Math.PI;
           paddle.x += Math.min(Math.max(-3, AccelX), 3);
-          paddle.x = Math.min(Math.max(-380, paddle.x), 0);
+          paddle.x = Math.min(Math.max(-350, paddle.x), 0);
           paddle.y += Math.min(Math.max(-3, AccelY), 3);
           paddle.y = Math.min(Math.max(-280, paddle.y), 280);
           
@@ -274,8 +296,9 @@ Engine.ready(function(){
                 for(var z = 0; z < Enemies.length; z++) {
                   Enemies[z].x += 2000;
                   Score += 100;
-                  
                 }
+                stars[i].x -= 1000;
+                snd_tesla.play();
               } else {
                 hp++;
                 hp = Math.min(3, hp);  
@@ -287,6 +310,7 @@ Engine.ready(function(){
                    lifeImg.image = 'life1';
                 }
                 stars[i].x += 1200;
+                snd_star.play();
               }
             }
           }
@@ -328,6 +352,7 @@ Engine.ready(function(){
         }
       },
       play: function() {
+        snd_start.play();
         IntroTimer.play();
         hp = 3;
         lifeImg.image = 'life3';
@@ -340,7 +365,7 @@ Engine.ready(function(){
           parent: layout,
           name: 'spacebird',
           image: 'spacebird',
-          x: -380,
+          x: -350,
           y: 0,
           width: birdWidth,
           height: birdHeight

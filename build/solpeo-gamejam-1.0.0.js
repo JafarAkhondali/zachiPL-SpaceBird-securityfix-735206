@@ -153,25 +153,19 @@ Engine.Asset.Manager.register({
   'logo': Engine.Image('static/logo.png'),
   'press-start' : Engine.Image('static/press-start.png'),
   'cat2' : Engine.Image('static/cat2.png'),
+  'tesla' : Engine.Image('static/tesla.png'),
   'intro0' : Engine.Image('static/intro0.png'),
   'intro1' : Engine.Image('static/intro1.png'),
   'intro2' : Engine.Image('static/intro2.png'),
   'boom' : Engine.Sound('static/snd/cat_die.mp3'),
   'die' : Engine.Sound('static/snd/die.wav'),
   'fire' : Engine.Sound('static/snd/fire.wav'),
-  'getStar' : Engine.Sound('static/boom.mp3'),
-  'sndStartPressed' : Engine.Sound('static/snd/sndstart.wav'),
-  'introsnd' : Engine.Sound('static/snd/intro.wav')
+  'getstar' : Engine.Sound('static/boom.wav'),
+  'sndstart' : Engine.Sound('static/snd/sndstart.wav'),
+  'introsnd' : Engine.Sound('static/snd/intro.wav'),
+  'lionsnd' : Engine.Sound('static/snd/lion.mp3'),
+  'teslasnd' : Engine.Sound('static/snd/tesla_snd.mp3'),
   
-  /*'astar1' : Engine.Sound('static/snd/s1.mp3'),
-  'astar2' : Engine.Sound('static/snd/s1.mp3'),
-  'astar3' : Engine.Sound('static/snd/s1.mp3'),
-  'astar4' : Engine.Sound('static/snd/s1.mp3'),
-  'astar5' : Engine.Sound('static/snd/s1.mp3'),
-  'astar6' : Engine.Sound('static/snd/s1.mp3'),
-  'astar7' : Engine.Sound('static/snd/s1.mp3'),
-  'astar8' : Engine.Sound('static/snd/s1.mp3'),
-  'astar9' : Engine.Sound('static/snd/s1.mp3'),*/
 });
 
 Engine.Asset.Manager.load('assets');
@@ -217,10 +211,30 @@ Engine.ready(function(){
       autoplay: false
   });
   
+  var snd_start = new Engine.AmbientSound( {
+    sound: 'sndstart',
+    autoplay: false
+  });
+  
   var snd_intro = new Engine.AmbientSound( {
     sound: 'introsnd',
     autoplay: false,
     loop: true
+  });
+  
+  var snd_lion = new Engine.AmbientSound( {
+    sound: 'lionsnd',
+    autoplay: false
+  });
+  
+  var snd_tesla = new Engine.AmbientSound( {
+    sound: 'teslasnd',
+    autoplay: false
+  });
+  
+  var snd_star = new Engine.AmbientSound( {
+    sound: 'getstar',
+    autoplay: false
   });
   
   var viewport = new Engine.Viewport('engine', 800, 600);
@@ -286,6 +300,10 @@ Engine.ready(function(){
           for(var i = 0; i < Math.min(this.count-1, 8); i++) {
             SpawnMegaEnemy(Math.random() * 520 - 210, layout, Enemies); 
           }
+          snd_lion.play();
+          if(Math.random() > .05) {
+             SpawnTesla(Math.random() * 520 - 210, layout, stars)
+          }
         }
       },
       step: function() {
@@ -302,6 +320,7 @@ Engine.ready(function(){
       },
       play: function () {
         this.delay = 1250;
+        this.count = 0;
       }
     }
   });
@@ -381,7 +400,7 @@ Engine.ready(function(){
   
   var GameTimer = new Engine.Timer( {
     delay: 10,
-    duration: 500,
+    duration: 200,
 	type: Engine.Timer.VSYNC,
 	autoplay: false,
 	loop: true,
@@ -441,25 +460,33 @@ Engine.ready(function(){
           AccelY = Math.min(Math.max(-10, AccelY), 10);
           paddle.rotation = (-AccelY / 90) * Math.PI;
           paddle.x += Math.min(Math.max(-3, AccelX), 3);
-          paddle.x = Math.min(Math.max(-380, paddle.x), 0);
+          paddle.x = Math.min(Math.max(-350, paddle.x), 0);
           paddle.y += Math.min(Math.max(-3, AccelY), 3);
           paddle.y = Math.min(Math.max(-280, paddle.y), 280);
           
           // detect collision
           for(var i = 0; i < stars.length; i++) {
             if(stars[i].getGlobalBoundingBox().overlap(paddle.getGlobalBoundingBox())) {
-              hp++;
-              hp = Math.min(3, hp);  
-              if(hp == 3 ) {
-                lifeImg.image = 'life3';
-              } else if (hp == 2) {
-                lifeImg.image = 'life2'; 
-              } else if (hp == 1) {
-                 lifeImg.image = 'life1';
+              if(stars[i].name == 'tesla') {
+                for(var z = 0; z < Enemies.length; z++) {
+                  Enemies[z].x += 2000;
+                  Score += 100;
+                }
+                stars[i].x -= 1000;
+                snd_tesla.play();
               } else {
-                DeadTimer.play();
+                hp++;
+                hp = Math.min(3, hp);  
+                if(hp == 3 ) {
+                  lifeImg.image = 'life3';
+                } else if (hp == 2) {
+                  lifeImg.image = 'life2'; 
+                } else if (hp == 1) {
+                   lifeImg.image = 'life1';
+                }
+                stars[i].x += 1200;
+                snd_star.play();
               }
-              stars[i].x += 1200;
             }
           }
           for(var i = 0; i < Enemies.length; i++) {
@@ -500,6 +527,7 @@ Engine.ready(function(){
         }
       },
       play: function() {
+        snd_start.play();
         IntroTimer.play();
         hp = 3;
         lifeImg.image = 'life3';
@@ -512,7 +540,7 @@ Engine.ready(function(){
           parent: layout,
           name: 'spacebird',
           image: 'spacebird',
-          x: -380,
+          x: -350,
           y: 0,
           width: birdWidth,
           height: birdHeight
@@ -701,6 +729,38 @@ function Star(posX, posY, lay, stars) {
         view.x -= 1.7;
         if(view.x < -1000) {
           view.x = 1000; 
+        }
+      }
+    }
+});
+  
+}
+function SpawnTesla(posY, lay, stars) {
+  var layout = lay;
+  var scr = 0;
+  var view = new Engine.Rectangle( {
+    parent: layout,
+    name: 'tesla',
+    image: 'tesla',
+    x: 470 + Math.random() * 120,
+    y: posY,
+    width: 25,
+    height: 37
+  } );
+  stars.push(view);
+  
+  var TeslaTimer = new Engine.Timer( {
+    delay: 10,
+    duration: 160,
+    type: Engine.Timer.VSYNC,
+    autoplay: true,
+    loop: true ,
+    on : { 
+      step: function() {
+        view.x -= 7.7;
+        if(view.x < -500) {
+          view.destroy();
+          TeslaTimer.stop(); 
         }
       }
     }
