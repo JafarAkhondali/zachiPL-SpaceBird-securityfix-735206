@@ -38,7 +38,7 @@ function Star(posX, posY, lay, stars) {
           StarTimer.stop();
           Engine.Rectangle.free(view);
         }
-        view.x -= 0.7;
+        view.x -= 1.7;
         if(view.x < -1000) {
           view.x = 1000; 
         }

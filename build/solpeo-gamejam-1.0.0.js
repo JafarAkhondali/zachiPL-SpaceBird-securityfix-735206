@@ -4,32 +4,36 @@
 * 
 ***********************************************************************/
 !(function(){'use strict';
-function SpawnEnemy(y, lay, Enemies) {
+function SpawnMegaEnemy(y, lay, Enemies) {
+  var rotation = Math.random() * 6 - 1.5;
+  var spdP = Math.random() * 2;
   var layout = lay;
   var EE = Enemies;
   var bullet = new Engine.Rectangle( {
     parent: layout,
-    name: 'cat',
-    image: 'enemy',
+    name: 'cat2',
+    image: 'cat2',
     x: 420,
     y: y,
     width: 64,
-    height: 61
+    height: 61,
+    rotation: rotation / 360
   });
   Enemies.push(bullet);
   
   var BulletTimer = new Engine.Timer( {
-    delay:20,
+    delay:10,
     duration: (1000 + Math.random() * 1800),
     type:Engine.Timer.VSYNC,
     autoplay: true,
     loop: true,
     on : {
       loop: function() {
-        SpawnEnemyBullet(bullet.x, bullet.y, layout, EE);
+        //SpawnEnemyBullet(bullet.x, bullet.y, layout, EE, rotation);
       },
       step: function() {
-        bullet.x -= 2;
+        bullet.x -= 9 + spdP;
+        bullet.y += rotation ;
         if(bullet.x < -420) {
           //layout.removeChild(bullet);
           bullet.destroy();
@@ -45,8 +49,54 @@ function SpawnEnemy(y, lay, Enemies) {
   });
 }
 
-function SpawnEnemyBullet(x, y, lay, EnBullets) {
+function SpawnEnemy(y, lay, Enemies) {
+  var rotation = Math.random() * 6 - 1.5;
+  var spdP = Math.random() * 2;
   var layout = lay;
+  var EE = Enemies;
+  var bullet = new Engine.Rectangle( {
+    parent: layout,
+    name: 'cat',
+    image: 'enemy',
+    x: 420,
+    y: y,
+    width: 64,
+    height: 61,
+    rotation: rotation / 360
+  });
+  Enemies.push(bullet);
+  
+  var BulletTimer = new Engine.Timer( {
+    delay:20,
+    duration: (1000 + Math.random() * 1800),
+    type:Engine.Timer.VSYNC,
+    autoplay: true,
+    loop: true,
+    on : {
+      loop: function() {
+        SpawnEnemyBullet(bullet.x, bullet.y, layout, EE, rotation);
+      },
+      step: function() {
+        bullet.x -= 2 + spdP;
+        bullet.y += rotation * .3;
+        if(bullet.x < -420) {
+          //layout.removeChild(bullet);
+          bullet.destroy();
+          BulletTimer.stop();
+          Enemies.remove(this);
+        }
+      },
+      stop : function() {
+        Engine.Rectangle.free(bullet)
+        Engine.Timer.free(BulletTimer);
+      }
+    }
+  });
+}
+
+function SpawnEnemyBullet(x, y, lay, EnBullets, rot) {
+  var layout = lay;
+  var r = rot;
   var obj = new Engine.Rectangle( {
     parent: layout,
     name: 'enemyBullet',
@@ -65,7 +115,8 @@ function SpawnEnemyBullet(x, y, lay, EnBullets) {
     loop: true,
     on : {
       step: function() {
-        obj.x -= 4;
+        obj.x -= 7;
+        obj.y += r * .85;
         if(obj.x < -420) {
           obj.destroy();
           EnBullets.remove(obj);
@@ -98,15 +149,36 @@ Engine.Asset.Manager.register({
   'life3': Engine.Image('static/life3.png'),
   'life2': Engine.Image('static/life2.png'),
   'life1': Engine.Image('static/life1.png'),
+  'dead': Engine.Image('static/dead.png'),
   'logo': Engine.Image('static/logo.png'),
   'press-start' : Engine.Image('static/press-start.png'),
-  'boom' : Engine.Sound('static/boom.mp3')
+  'cat2' : Engine.Image('static/cat2.png'),
+  'intro0' : Engine.Image('static/intro0.png'),
+  'intro1' : Engine.Image('static/intro1.png'),
+  'intro2' : Engine.Image('static/intro2.png'),
+  'boom' : Engine.Sound('static/snd/cat_die.mp3'),
+  'die' : Engine.Sound('static/snd/die.wav'),
+  'fire' : Engine.Sound('static/snd/fire.wav'),
+  'getStar' : Engine.Sound('static/boom.mp3'),
+  'sndStartPressed' : Engine.Sound('static/snd/sndstart.wav'),
+  'introsnd' : Engine.Sound('static/snd/intro.wav')
+  
+  /*'astar1' : Engine.Sound('static/snd/s1.mp3'),
+  'astar2' : Engine.Sound('static/snd/s1.mp3'),
+  'astar3' : Engine.Sound('static/snd/s1.mp3'),
+  'astar4' : Engine.Sound('static/snd/s1.mp3'),
+  'astar5' : Engine.Sound('static/snd/s1.mp3'),
+  'astar6' : Engine.Sound('static/snd/s1.mp3'),
+  'astar7' : Engine.Sound('static/snd/s1.mp3'),
+  'astar8' : Engine.Sound('static/snd/s1.mp3'),
+  'astar9' : Engine.Sound('static/snd/s1.mp3'),*/
 });
 
 Engine.Asset.Manager.load('assets');
 Engine.Asset.Manager.groups.assets.loader.on('ready', function() {
   
 });
+
 /* global Engine */
 /**
  * this event is triggered when all aseets from a default asset group
@@ -129,6 +201,27 @@ Engine.ready(function(){
   var Score = 0;
   var bird1 = false;
   var hp = 3;
+  
+  var snd_catDie = new Engine.AmbientSound( {
+      sound: 'boom',
+      autoplay: false
+  });
+  
+  var snd_shoot = new Engine.AmbientSound( {
+      sound: 'fire',
+      autoplay: false
+  });
+  
+  var snd_die = new Engine.AmbientSound( {
+      sound: 'die',
+      autoplay: false
+  });
+  
+  var snd_intro = new Engine.AmbientSound( {
+    sound: 'introsnd',
+    autoplay: false,
+    loop: true
+  });
   
   var viewport = new Engine.Viewport('engine', 800, 600);
   var scene = new Engine.Scene({
@@ -168,6 +261,7 @@ Engine.ready(function(){
   
   var logoImg;
   var pressStartImg;
+  var startText;
   
   var lifeImg = new Engine.Rectangle( {
     parent: layout,
@@ -180,20 +274,107 @@ Engine.ready(function(){
   });
   
   var SpawnTimer = new Engine.Timer( {
-    delay: 1500,
+    delay: 1250,
     tupe:Engine.Timer.VSYNC,
     autoplay: false,
+    duration: 10000,
     loop: true,
     on : {
-      step: function() {
-        var enY = Math.random() * 520 - 210;
-        SpawnEnemy(enY, layout, Enemies)
-        if(Math.abs(enY) > 120) 
-        {
-          if(Math.random() > .6) {
-            SpawnEnemy(-enY, layout, Enemies); 
+      loop: function() {
+        if(!IntroTimer.playing) {
+          this.delay *= .9;
+          for(var i = 0; i < Math.min(this.count-1, 8); i++) {
+            SpawnMegaEnemy(Math.random() * 520 - 210, layout, Enemies); 
           }
         }
+      },
+      step: function() {
+        if(!IntroTimer.playing) {
+          var enY = Math.random() * 520 - 210;
+          SpawnEnemy(enY, layout, Enemies)
+          if(Math.abs(enY) > 120) 
+          {
+            if(Math.random() > .3) {
+              SpawnEnemy(-enY, layout, Enemies); 
+            }
+          }
+        }
+      },
+      play: function () {
+        this.delay = 1250;
+      }
+    }
+  });
+  
+  var DeadImage;
+  var IntroImage;
+  
+  var introId = 0;
+  var IntroTimer = new Engine.Timer( {
+    delay: 10,
+    duration: 4300,
+    type: Engine.Timer.VSYNC,
+    autoplay: false,
+    loop: true,
+    on: {
+      play: function() {
+        introId = 0;
+        snd_intro.play();
+        IntroImage = new Engine.Rectangle( {
+          width: 800,
+          height: 600,
+          x: 0,
+          y: 0,
+          parent: layout,
+          zIndex: 4,
+          image: 'intro0'
+        });
+      },
+      loop: function() {
+        introId++;
+        if(introId == 1) {
+          IntroImage.image = 'intro1'; 
+        } else if(introId == 2) {
+          IntroImage.image = 'intro2'; 
+        } else {
+          IntroTimer.stop();
+        }
+      },
+      stop: function() {
+        IntroImage.destroy();
+        snd_intro.stop();
+      }
+    }
+  });
+  
+  var DeadTimer = new Engine.Timer( {
+    delay: 10,
+    duration: 3000,
+    type: Engine.Timer.VSYNC,
+    autoplay: false,
+    loop: false,
+    on : {
+      play: function() {
+        snd_die.play();
+        paddle.destroy();
+         DeadImage = new Engine.Rectangle( {
+           x: 0,
+           y: 0,
+           width: 10,
+           height: 10,
+           image: 'dead',
+           zIndex: 10,
+           parent: layout,
+           name: 'deadImg'
+         });
+      },
+      step : function () {
+        DeadImage.width += 1.5;
+        DeadImage.height += 1.5;
+      },
+      stop : function() {
+        DeadImage.destroy();
+        GameTimer.stop();
       }
     }
   });
@@ -225,13 +406,15 @@ Engine.ready(function(){
           Bullets[i].x += 1000;
         }
         for(var i = 0; i < stars.length; i++) {
-          stars[i].y += 2000;
+          stars[i].y -= 3000;
         }
         MenuTimer.play(); 
         SpawnTimer.stop();
       },
       step: function() {
-        scene.color = "#000000"
+        if(IntroTimer.playing) {
+         return; 
+        }
         if(paddle) {
           if(btnLeft) AccelX -= .2;
           if(btnLeft && (AccelX > 0)) {
@@ -272,10 +455,11 @@ Engine.ready(function(){
               } else if (hp == 2) {
                 lifeImg.image = 'life2'; 
               } else if (hp == 1) {
-                 lifeImg.image == 'life1';
+                 lifeImg.image = 'life1';
               } else {
-                GameTimer.stop(); 
+                DeadTimer.play();
               }
+              stars[i].x += 1200;
             }
           }
           for(var i = 0; i < Enemies.length; i++) {
@@ -287,26 +471,26 @@ Engine.ready(function(){
               } else if (hp == 2) {
                 lifeImg.image = 'life2'; 
               } else if (hp == 1) {
-                 lifeImg.image == 'life1';
+                 lifeImg.image = 'life1';
               } else {
-                GameTimer.stop(); 
+                DeadTimer.play();
+                lifeImg.image = 'dead';
               }
               Enemies[i].x -= 1000;
             }
             for (var j = 0; j < Bullets.length; j++) {
                if(Enemies[i].getGlobalBoundingBox().overlap(Bullets[j].getGlobalBoundingBox())) {
-                 Bullets[j].x += 1000;
-                 Enemies[i].x -= 1000;
-                 if(Enemies[i].name == 'cat') {
-                    Score += 100;
-                   new Engine.AmbientSound( {
-                     sound: 'boom',
-                     autoplay: true
-                   });
-                 } else {
-                    Score += 10; 
+                 if(Enemies[i].name != 'cat2') {
+                   Bullets[j].x += 1000;
+                   Enemies[i].x -= 1000;
+                   if(Enemies[i].name == 'cat') {
+                      Score += 100;
+                      snd_catDie.play();
+                   } else {
+                      Score += 10; 
+                   }
+                  scoreText.text = 'SCORE: ' + Score; 
                  }
-                scoreText.text = 'SCORE: ' + Score; 
                }
             }
           }
@@ -316,6 +500,7 @@ Engine.ready(function(){
         }
       },
       play: function() {
+        IntroTimer.play();
         hp = 3;
         lifeImg.image = 'life3';
         GameTimer.trigger('genStar');
@@ -357,11 +542,12 @@ Engine.ready(function(){
 	loop: true,
     on : {
       stop: function() {
-         GameTimer.play();
+        GameTimer.play();
         logoImg.destroy();
         Engine.Rectangle.free(logoImg);
         pressStartImg.destroy();
         Engine.Rectangle.free(pressStartImg);
+        startText.destroy();
       },
       step: function() {
         scene.color = "#aaaaaa"
@@ -374,17 +560,29 @@ Engine.ready(function(){
           image: 'logo',
           x: 0,
           y: -100,
-          width:400,
-          height: 128
+          width:618,
+          height: 58
         });
+        startText  =new Engine.Shape.Text ({
+          parent: layout,
+          name: 'startText',
+          fontSize:22,
+          font: Engine.Font('static/widepixel.ttf'),
+          text: 'Press space to',
+          x : -110,
+          y : 40,
+          //textAlign: Engine.Shape.Text.CENTER,
+          width: 999,
+          textColor: '#ffffff'
+        } );
         pressStartImg = new Engine.Rectangle( {
           parent: layout,
           name: 'pressStartImg',
           image: 'press-start',
           x:0,
           y: 100,
-          width: 450,
-          height: 64
+          width: 330,
+          height: 60
         });
       }
     }
@@ -395,6 +593,7 @@ Engine.ready(function(){
     if(e.key == "SPACE") {
       if(GameTimer.playing) {
         Shoot(paddle.x, paddle.y, layout, Bullets, paddle.rotation);
+        snd_shoot.play();
       } else {
         MenuTimer.stop(); 
       }
@@ -499,7 +698,7 @@ function Star(posX, posY, lay, stars) {
           StarTimer.stop();
           Engine.Rectangle.free(view);
         }
-        view.x -= 0.7;
+        view.x -= 1.7;
         if(view.x < -1000) {
           view.x = 1000; 
         }

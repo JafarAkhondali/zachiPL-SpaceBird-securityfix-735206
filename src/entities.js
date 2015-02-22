@@ -17,9 +17,29 @@ Engine.Asset.Manager.register({
   'life3': Engine.Image('static/life3.png'),
   'life2': Engine.Image('static/life2.png'),
   'life1': Engine.Image('static/life1.png'),
+  'dead': Engine.Image('static/dead.png'),
   'logo': Engine.Image('static/logo.png'),
   'press-start' : Engine.Image('static/press-start.png'),
-  'boom' : Engine.Sound('static/boom.mp3')
+  'cat2' : Engine.Image('static/cat2.png'),
+  'intro0' : Engine.Image('static/intro0.png'),
+  'intro1' : Engine.Image('static/intro1.png'),
+  'intro2' : Engine.Image('static/intro2.png'),
+  'boom' : Engine.Sound('static/snd/cat_die.mp3'),
+  'die' : Engine.Sound('static/snd/die.wav'),
+  'fire' : Engine.Sound('static/snd/fire.wav'),
+  'getStar' : Engine.Sound('static/boom.mp3'),
+  'sndStartPressed' : Engine.Sound('static/snd/sndstart.wav'),
+  'introsnd' : Engine.Sound('static/snd/intro.wav')
+  
+  /*'astar1' : Engine.Sound('static/snd/s1.mp3'),
+  'astar2' : Engine.Sound('static/snd/s1.mp3'),
+  'astar3' : Engine.Sound('static/snd/s1.mp3'),
+  'astar4' : Engine.Sound('static/snd/s1.mp3'),
+  'astar5' : Engine.Sound('static/snd/s1.mp3'),
+  'astar6' : Engine.Sound('static/snd/s1.mp3'),
+  'astar7' : Engine.Sound('static/snd/s1.mp3'),
+  'astar8' : Engine.Sound('static/snd/s1.mp3'),
+  'astar9' : Engine.Sound('static/snd/s1.mp3'),*/
 });
 
 Engine.Asset.Manager.load('assets');

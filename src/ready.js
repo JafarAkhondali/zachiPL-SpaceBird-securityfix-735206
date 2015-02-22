@@ -21,6 +21,27 @@ Engine.ready(function(){
   var bird1 = false;
   var hp = 3;
   
+  var snd_catDie = new Engine.AmbientSound( {
+      sound: 'boom',
+      autoplay: false
+  });
+  
+  var snd_shoot = new Engine.AmbientSound( {
+      sound: 'fire',
+      autoplay: false
+  });
+  
+  var snd_die = new Engine.AmbientSound( {
+      sound: 'die',
+      autoplay: false
+  });
+  
+  var snd_intro = new Engine.AmbientSound( {
+    sound: 'introsnd',
+    autoplay: false,
+    loop: true
+  });
+  
   var viewport = new Engine.Viewport('engine', 800, 600);
   var scene = new Engine.Scene({
       color: "#aaaaaa"
@@ -59,6 +80,7 @@ Engine.ready(function(){
   
   var logoImg;
   var pressStartImg;
+  var startText;
   
   var lifeImg = new Engine.Rectangle( {
     parent: layout,
@@ -71,20 +93,107 @@ Engine.ready(function(){
   });
   
   var SpawnTimer = new Engine.Timer( {
-    delay: 1500,
+    delay: 1250,
     tupe:Engine.Timer.VSYNC,
     autoplay: false,
+    duration: 10000,
     loop: true,
     on : {
-      step: function() {
-        var enY = Math.random() * 520 - 210;
-        SpawnEnemy(enY, layout, Enemies)
-        if(Math.abs(enY) > 120) 
-        {
-          if(Math.random() > .5) {
-            SpawnEnemy(-enY, layout, Enemies); 
+      loop: function() {
+        if(!IntroTimer.playing) {
+          this.delay *= .9;
+          for(var i = 0; i < Math.min(this.count-1, 8); i++) {
+            SpawnMegaEnemy(Math.random() * 520 - 210, layout, Enemies); 
           }
         }
+      },
+      step: function() {
+        if(!IntroTimer.playing) {
+          var enY = Math.random() * 520 - 210;
+          SpawnEnemy(enY, layout, Enemies)
+          if(Math.abs(enY) > 120) 
+          {
+            if(Math.random() > .3) {
+              SpawnEnemy(-enY, layout, Enemies); 
+            }
+          }
+        }
+      },
+      play: function () {
+        this.delay = 1250;
+      }
+    }
+  });
+  
+  var DeadImage;
+  var IntroImage;
+  
+  var introId = 0;
+  var IntroTimer = new Engine.Timer( {
+    delay: 10,
+    duration: 4300,
+    type: Engine.Timer.VSYNC,
+    autoplay: false,
+    loop: true,
+    on: {
+      play: function() {
+        introId = 0;
+        snd_intro.play();
+        IntroImage = new Engine.Rectangle( {
+          width: 800,
+          height: 600,
+          x: 0,
+          y: 0,
+          parent: layout,
+          zIndex: 4,
+          image: 'intro0'
+        });
+      },
+      loop: function() {
+        introId++;
+        if(introId == 1) {
+          IntroImage.image = 'intro1'; 
+        } else if(introId == 2) {
+          IntroImage.image = 'intro2'; 
+        } else {
+          IntroTimer.stop();
+        }
+      },
+      stop: function() {
+        IntroImage.destroy();
+        snd_intro.stop();
+      }
+    }
+  });
+  
+  var DeadTimer = new Engine.Timer( {
+    delay: 10,
+    duration: 3000,
+    type: Engine.Timer.VSYNC,
+    autoplay: false,
+    loop: false,
+    on : {
+      play: function() {
+        snd_die.play();
+        paddle.destroy();
+         DeadImage = new Engine.Rectangle( {
+           x: 0,
+           y: 0,
+           width: 10,
+           height: 10,
+           image: 'dead',
+           zIndex: 10,
+           parent: layout,
+           name: 'deadImg'
+         });
+      },
+      step : function () {
+        DeadImage.width += 1.5;
+        DeadImage.height += 1.5;
+      },
+      stop : function() {
+        DeadImage.destroy();
+        GameTimer.stop();
       }
     }
   });
@@ -116,13 +225,15 @@ Engine.ready(function(){
           Bullets[i].x += 1000;
         }
         for(var i = 0; i < stars.length; i++) {
-          stars[i].y += 2000;
+          stars[i].y -= 3000;
         }
         MenuTimer.play(); 
         SpawnTimer.stop();
       },
       step: function() {
-        scene.color = "#000000"
+        if(IntroTimer.playing) {
+         return; 
+        }
         if(paddle) {
           if(btnLeft) AccelX -= .2;
           if(btnLeft && (AccelX > 0)) {
@@ -163,10 +274,11 @@ Engine.ready(function(){
               } else if (hp == 2) {
                 lifeImg.image = 'life2'; 
               } else if (hp == 1) {
-                 lifeImg.image == 'life1';
+                 lifeImg.image = 'life1';
               } else {
-                GameTimer.stop(); 
+                DeadTimer.play();
               }
+              stars[i].x += 1200;
             }
           }
           for(var i = 0; i < Enemies.length; i++) {
@@ -178,26 +290,26 @@ Engine.ready(function(){
               } else if (hp == 2) {
                 lifeImg.image = 'life2'; 
               } else if (hp == 1) {
-                 lifeImg.image == 'life1';
+                 lifeImg.image = 'life1';
               } else {
-                GameTimer.stop(); 
+                DeadTimer.play();
+                lifeImg.image = 'dead';
               }
               Enemies[i].x -= 1000;
             }
             for (var j = 0; j < Bullets.length; j++) {
                if(Enemies[i].getGlobalBoundingBox().overlap(Bullets[j].getGlobalBoundingBox())) {
-                 Bullets[j].x += 1000;
-                 Enemies[i].x -= 1000;
-                 if(Enemies[i].name == 'cat') {
-                    Score += 100;
-                   new Engine.AmbientSound( {
-                     sound: 'boom',
-                     autoplay: true
-                   });
-                 } else {
-                    Score += 10; 
+                 if(Enemies[i].name != 'cat2') {
+                   Bullets[j].x += 1000;
+                   Enemies[i].x -= 1000;
+                   if(Enemies[i].name == 'cat') {
+                      Score += 100;
+                      snd_catDie.play();
+                   } else {
+                      Score += 10; 
+                   }
+                  scoreText.text = 'SCORE: ' + Score; 
                  }
-                scoreText.text = 'SCORE: ' + Score; 
                }
             }
           }
@@ -207,6 +319,7 @@ Engine.ready(function(){
         }
       },
       play: function() {
+        IntroTimer.play();
         hp = 3;
         lifeImg.image = 'life3';
         GameTimer.trigger('genStar');
@@ -248,11 +361,12 @@ Engine.ready(function(){
 	loop: true,
     on : {
       stop: function() {
-         GameTimer.play();
+        GameTimer.play();
         logoImg.destroy();
         Engine.Rectangle.free(logoImg);
         pressStartImg.destroy();
         Engine.Rectangle.free(pressStartImg);
+        startText.destroy();
       },
       step: function() {
         scene.color = "#aaaaaa"
@@ -265,17 +379,29 @@ Engine.ready(function(){
           image: 'logo',
           x: 0,
           y: -100,
-          width:400,
-          height: 128
+          width:618,
+          height: 58
         });
+        startText  =new Engine.Shape.Text ({
+          parent: layout,
+          name: 'startText',
+          fontSize:22,
+          font: Engine.Font('static/widepixel.ttf'),
+          text: 'Press space to',
+          x : -110,
+          y : 40,
+          //textAlign: Engine.Shape.Text.CENTER,
+          width: 999,
+          textColor: '#ffffff'
+        } );
         pressStartImg = new Engine.Rectangle( {
           parent: layout,
           name: 'pressStartImg',
           image: 'press-start',
           x:0,
           y: 100,
-          width: 450,
-          height: 64
+          width: 330,
+          height: 60
         });
       }
     }
@@ -286,6 +412,7 @@ Engine.ready(function(){
     if(e.key == "SPACE") {
       if(GameTimer.playing) {
         Shoot(paddle.x, paddle.y, layout, Bullets, paddle.rotation);
+        snd_shoot.play();
       } else {
         MenuTimer.stop(); 
       }
