@@ -105,6 +105,9 @@ Engine.ready(function(){
           for(var i = 0; i < Math.min(this.count-1, 8); i++) {
             SpawnMegaEnemy(Math.random() * 520 - 210, layout, Enemies); 
           }
+          if(Math.random() > .2) {
+             SpawnTesla(Math.random() * 520 - 210, layout, stars)
+          }
         }
       },
       step: function() {
@@ -267,18 +270,24 @@ Engine.ready(function(){
           // detect collision
           for(var i = 0; i < stars.length; i++) {
             if(stars[i].getGlobalBoundingBox().overlap(paddle.getGlobalBoundingBox())) {
-              hp++;
-              hp = Math.min(3, hp);  
-              if(hp == 3 ) {
-                lifeImg.image = 'life3';
-              } else if (hp == 2) {
-                lifeImg.image = 'life2'; 
-              } else if (hp == 1) {
-                 lifeImg.image = 'life1';
+              if(stars[i].name == 'tesla') {
+                for(var z = 0; z < Enemies.length; z++) {
+                  Enemies[z].x += 2000;
+                  Score += 100;
+                  
+                }
               } else {
-                DeadTimer.play();
+                hp++;
+                hp = Math.min(3, hp);  
+                if(hp == 3 ) {
+                  lifeImg.image = 'life3';
+                } else if (hp == 2) {
+                  lifeImg.image = 'life2'; 
+                } else if (hp == 1) {
+                   lifeImg.image = 'life1';
+                }
+                stars[i].x += 1200;
               }
-              stars[i].x += 1200;
             }
           }
           for(var i = 0; i < Enemies.length; i++) {

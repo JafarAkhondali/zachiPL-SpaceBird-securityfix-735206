@@ -21,6 +21,7 @@ Engine.Asset.Manager.register({
   'logo': Engine.Image('static/logo.png'),
   'press-start' : Engine.Image('static/press-start.png'),
   'cat2' : Engine.Image('static/cat2.png'),
+  'tesla' : Engine.Image('static/tesla.png'),
   'intro0' : Engine.Image('static/intro0.png'),
   'intro1' : Engine.Image('static/intro1.png'),
   'intro2' : Engine.Image('static/intro2.png'),
