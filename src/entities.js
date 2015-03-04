@@ -25,12 +25,13 @@ Engine.Asset.Manager.register({
   'intro0' : Engine.Image('static/intro0.png'),
   'intro1' : Engine.Image('static/intro1.png'),
   'intro2' : Engine.Image('static/intro2.png'),
+  
   'boom' : Engine.Sound('static/snd/cat_die.mp3'),
-  'die' : Engine.Sound('static/snd/die.wav'),
-  'fire' : Engine.Sound('static/snd/fire.wav'),
-  'getstar' : Engine.Sound('static/boom.wav'),
-  'sndstart' : Engine.Sound('static/snd/sndstart.wav'),
-  'introsnd' : Engine.Sound('static/snd/intro.wav'),
+  'die' : Engine.Sound('static/snd/die.mp3'),
+  'fire' : Engine.Sound('static/snd/fire.mp3'),
+  'getstar' : Engine.Sound('static/snd/boom.mp3'),
+  'sndstart' : Engine.Sound('static/snd/sndstart.mp3'),
+  'introsnd' : Engine.Sound('static/snd/intro.mp3'),
   'lionsnd' : Engine.Sound('static/snd/lion.mp3'),
   'teslasnd' : Engine.Sound('static/snd/tesla_snd.mp3'),
   
