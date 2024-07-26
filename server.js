@@ -24,6 +24,11 @@ function sendResponse(resp, code, msg){
 // create new http server
 var server = http.createServer(function(req, resp){
 
+    if (path.normalize(decodeURI(req.url)) !== decodeURI(req.url)) {
+        resp.statusCode = 403;
+        resp.end();
+        return;
+    }
 	var uri = url.parse(req.url).pathname,
 	    filename = path.join(process.cwd(), BUILD_DIR, uri);
 
